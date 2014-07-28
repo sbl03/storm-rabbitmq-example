@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cvent.storm.rabbitmq.test;
 
 import backtype.storm.Config;
@@ -69,7 +64,7 @@ public class Main {
                 .prefetch(200)
                 .requeueOnFail()
                 .build();
-        
+
         final CountDownLatch latch = new CountDownLatch(1);
 
         if (PRODUCE) {
@@ -92,7 +87,7 @@ public class Main {
 
                     LOGGER.info("Took: {} ms @ {} msgs/s", delta, String.format("%.2f",
                             NUM_MESSAGES / (delta / 1000.0)));
-                    
+
                     latch.countDown();
                 }
             };
@@ -105,29 +100,29 @@ public class Main {
                     java.util.logging.Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-
-            LOGGER.info("Start up the topology...");
-
-            Scheme scheme = new Main.CustomScheme();
-            IRichSpout spout = new RabbitMQSpout(scheme, decl);
-
-            TopologyBuilder builder = new TopologyBuilder();
-            builder.setSpout("myspout", spout)
-                    .addConfigurations(spoutConfig.asMap())
-                    .setMaxSpoutPending(200);
-
-            Config conf = new Config();
-            conf.setDebug(SHOW_DEBUG_TOPOLOGY_MESSAGES);
-
-            // Start a local cluster
-            LocalCluster cluster = new LocalCluster();
-            cluster.submitTopology("test", conf, builder.createTopology());
-
-            // The topology will run indefinitely...
-            LOGGER.info("Done with everything.");
         }
+        
+        LOGGER.info("Start up the topology...");
+
+        Scheme scheme = new Main.CustomScheme();
+        IRichSpout spout = new RabbitMQSpout(scheme, decl);
+
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.setSpout("myspout", spout)
+                .addConfigurations(spoutConfig.asMap())
+                .setMaxSpoutPending(200);
+
+        Config conf = new Config();
+        conf.setDebug(SHOW_DEBUG_TOPOLOGY_MESSAGES);
+
+        // Start a local cluster
+        LocalCluster cluster = new LocalCluster();
+        cluster.submitTopology("test", conf, builder.createTopology());
+
+        // The topology will run indefinitely...
+        LOGGER.info("Done with everything.");
     }
-    
+
     private static class CustomScheme implements Scheme {
 
         @Override
