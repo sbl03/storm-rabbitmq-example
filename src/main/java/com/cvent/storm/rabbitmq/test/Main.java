@@ -37,15 +37,22 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final String RABBITMQ_HOST = "localhost";
+    private static final String RABBITMQ_USER = "guest";
+    private static final String RABBITMQ_PASS = "guest";
     private static final String EXCHANGE_NAME = "storm-test-exchange";
     private static final String QUEUE_NAME = "storm-test-queue";
     private static final int NUM_MESSAGES = 10000;
+    private static final String MESSAGE = "test message";
     private static final boolean PRODUCE = true;
+    
+    // Will publish a message everytime it consumes if true
+    private static final boolean SHOW_DEBUG_TOPOLOGY_MESSAGES = false;
 
     public static void main(String[] args) {
         // Initialize everything
-        Message msg = new Message("test message".getBytes());
-        ConnectionConfig connConfig = new ConnectionConfig("localhost", "guest", "guest");
+        Message msg = new Message(MESSAGE.getBytes());
+        ConnectionConfig connConfig = new ConnectionConfig(RABBITMQ_HOST, RABBITMQ_USER, RABBITMQ_PASS);
         Declarator decl = new CustomDeclarator(EXCHANGE_NAME, QUEUE_NAME);
         ProducerConfig pConfig = new ProducerConfigBuilder().connection(connConfig)
                 .exchange(EXCHANGE_NAME)
@@ -87,7 +94,7 @@ public class Main {
                 .setMaxSpoutPending(200);
 
         Config conf = new Config();
-        conf.setDebug(true);
+        conf.setDebug(SHOW_DEBUG_TOPOLOGY_MESSAGES);
 
         // Start a local cluster
         LocalCluster cluster = new LocalCluster();
