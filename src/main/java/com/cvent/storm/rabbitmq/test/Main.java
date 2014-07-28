@@ -12,7 +12,6 @@ import backtype.storm.topology.IRichSpout;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import backtype.storm.utils.Utils;
 import com.rabbitmq.client.Channel;
 import io.latent.storm.rabbitmq.Declarator;
 import io.latent.storm.rabbitmq.Message;
@@ -41,7 +40,7 @@ public class Main {
     private static final String EXCHANGE_NAME = "storm-test-exchange";
     private static final String QUEUE_NAME = "storm-test-queue";
     private static final int NUM_MESSAGES = 10000;
-    private static final boolean PRODUCE = false;
+    private static final boolean PRODUCE = true;
 
     public static void main(String[] args) {
         // Initialize everything
@@ -64,7 +63,7 @@ public class Main {
             RabbitMQProducer producer = new RabbitMQProducer(decl);
             producer.open(pConfig.asMap());
 
-            LOGGER.info("Starting producers.");
+            LOGGER.info("Starting producer for {} messages...", NUM_MESSAGES);
 
             long start = System.currentTimeMillis();
 
@@ -77,6 +76,8 @@ public class Main {
             LOGGER.info("Took: {} ms @ {} msgs/s", delta, String.format("%.2f", NUM_MESSAGES / (delta / 1000.0)));
         }
 
+        LOGGER.info("Start up the topology...");
+        
         Scheme scheme = new Main.CustomScheme();
         IRichSpout spout = new RabbitMQSpout(scheme, decl);
 
@@ -91,12 +92,10 @@ public class Main {
         // Start a local cluster
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("test", conf, builder.createTopology());
-        Utils.sleep(10000);
-        cluster.killTopology("test");
-        cluster.shutdown();
+        
+        // The topology will run indefinitely...
 
         LOGGER.info("Done with everything.");
-        //System.exit(0);
     }
 
     private static class CustomScheme implements Scheme {
